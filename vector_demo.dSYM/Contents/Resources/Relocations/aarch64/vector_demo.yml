@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/keynanwiggains/Documents/GitHub/comp2450/vector_demo'
+relocations:     []
+...
