@@ -21,8 +21,6 @@
 //               the output for your lab-notes.md.
 
 #include "Search.h"
-#include <algorithm>
-
 
 
 namespace dungeon {
