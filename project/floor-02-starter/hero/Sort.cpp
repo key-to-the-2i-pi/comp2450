@@ -144,7 +144,7 @@ namespace dungeon {
 
 void mergeSort(std::vector<Item>& inventory, const Comparator& cmp) {
     mergeSortImpl(inventory, 0, inventory.size(), cmp);
-}
+} 
 
 // ---- 2. Quicksort -------------------------------------------------------
 
