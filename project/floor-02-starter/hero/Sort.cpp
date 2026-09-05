@@ -49,7 +49,7 @@ namespace dungeon {
             }
             // one half is drained but the other still has items
             while (i < mid) scratch.push_back(v[i++]);
-            while (j < i) scratch.push_back(v[j++]);
+            while (j < high) scratch.push_back(v[j++]);
 
             // copy the merged result back into v at the positions [low, high)
             for (std::size_t k = 0; k < scratch.size(); ++k){
