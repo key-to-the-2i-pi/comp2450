@@ -1,0 +1,282 @@
+================================================================================
+COMP 2450 -- FLOOR 3: SWITCHING THE GAME OVER TO Bag<T>
+================================================================================
+
+--------------------------------------------------------------------------------
+1.  WHY THE BODIES SURVIVE UNTOUCHED
+--------------------------------------------------------------------------------
+
+Every algorithm in Floor 1 and Floor 2 uses exactly four things from its
+container: .size(), operator[], .begin(), .end(). Bag<T> provides all four,
+and -- this is the load-bearing detail --
+
+      using iterator       = typename std::vector<T>::iterator;
+      using const_iterator = typename std::vector<T>::const_iterator;
+
+Bag's iterators ARE vector's iterators. They are not a new type. So:
+
+  - for (const auto& m : bestiary)  works (range-for needs begin/end).
+  - std::sort(bag.begin(), bag.end(), cmp)  works, and is still a real
+    random-access sort -- not a slow fallback.
+  - v.begin() + lo  works (pointer arithmetic on a random-access iterator).
+  - std::vector<Item> left(v.begin() + lo, v.begin() + mid)  works: you can
+    still build a std::vector out of a range of Bag iterators. This is what
+    lets Sort.cpp's merge buffers stay as they are.
+
+
+--------------------------------------------------------------------------------
+2.  THE ORDER TO DO IT IN
+--------------------------------------------------------------------------------
+
+  STEP 1  Fill in Bag<T>'s bodies in hero/Bag.h.
+
+  STEP 2  Flip hero/Hero.h and bestiary/Bestiary.h.
+
+  STEP 3  Fix the two definitions the errors name: hero/Hero.cpp,
+          bestiary/Bestiary.cpp.
+
+  STEP 4  Fix the search family the errors now name: bestiary/Search.h,
+          bestiary/Search.cpp.
+
+  STEP 5  Fix bestiary/Bench.cpp. 
+
+  STEP 6  Flip hero/Sort.h, hero/Sort.cpp, hero/Bench.cpp.
+
+--------------------------------------------------------------------------------
+3.  FILE BY FILE
+--------------------------------------------------------------------------------
+
+Legend:   -  the line as it ships in the starter
+          +  the line after the switch
+
+
+3.1  hero/Hero.h                                                       3 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ L15   - #include <vector>
+        + #include "Bag.h"
+
+ L22   -     std::vector<Item> inventory;
+        +     Bag<Item>         inventory;
+
+ L29   - std::vector<Item> loadInventory(const std::string& path);
+        + Bag<Item> loadInventory(const std::string& path);
+
+
+3.2  hero/Hero.cpp                                                     2 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ L21   - std::vector<Item> loadInventory(const std::string& path) {
+        + Bag<Item> loadInventory(const std::string& path) {
+
+ L22   -     std::vector<Item> result;
+        +     Bag<Item> result;
+
+ No include change: Hero.cpp gets Bag.h through Hero.h.
+ L57 (const Item& it = hero.inventory[i];) and the whole printInventory body
+ are UNCHANGED -- Bag's operator[] covers it.
+
+
+3.3  hero/Sort.h                                                       3 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ L11   - #include <vector>
+        + #include "Bag.h"
+
+ L33   - void mergeSort(std::vector<Item>& inventory, const Comparator& cmp);
+        + void mergeSort(Bag<Item>& inventory, const Comparator& cmp);
+
+ L42   - void quicksort(std::vector<Item>& inventory, const Comparator& cmp);
+        + void quicksort(Bag<Item>& inventory, const Comparator& cmp);
+
+
+3.4  hero/Sort.cpp                                                     7 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ L12   ADD a line after  #include <sstream>  :
+        + #include <vector>
+
+        Sort.h no longer pulls <vector> in, but merge() still builds two
+        std::vector buffers (L31-32). It would still compile without this
+        line, because Bag.h itself includes <vector> -- but relying on that
+        is exactly the accidental dependency that breaks a file six months
+        later when someone tidies up an unrelated header. Sort.cpp names
+        std::vector, so Sort.cpp includes <vector>.
+
+ L26   - void merge(std::vector<Item>& v,
+        + void merge(Bag<Item>& v,
+
+ L51   - void mergeSortImpl(std::vector<Item>& v,
+        + void mergeSortImpl(Bag<Item>& v,
+
+ L64   - void mergeSort(std::vector<Item>& inventory, const Comparator& cmp) {
+        + void mergeSort(Bag<Item>& inventory, const Comparator& cmp) {
+
+ L78   - std::size_t partition(std::vector<Item>& v,
+        + std::size_t partition(Bag<Item>& v,
+
+ L99   - void quicksortImpl(std::vector<Item>& v,
+        + void quicksortImpl(Bag<Item>& v,
+
+ L112  - void quicksort(std::vector<Item>& inventory, const Comparator& cmp) {
+        + void quicksort(Bag<Item>& inventory, const Comparator& cmp) {
+
+ DO NOT CHANGE L31-L32:
+
+        std::vector<Item> left (v.begin() + lo,  v.begin() + mid);
+        std::vector<Item> right(v.begin() + mid, v.begin() + hi);
+
+        These are merge's scratch buffers, not the container being sorted.
+        They stay std::vector on purpose: Bag<T> has no range constructor
+        (section 4). They keep compiling because Bag's iterators are vector's
+        iterators.
+
+ sortInventory (L127-147) is UNCHANGED -- it calls std::sort on
+ hero.inventory directly, and that works on a Bag.
+
+
+3.5  bestiary/Search.h                                                 6 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ L23   - #include <vector>
+        + #include "../hero/Bag.h"
+
+ L31   - const Monster* linearSearch(const std::vector<Monster>& bestiary,
+        + const Monster* linearSearch(const Bag<Monster>& bestiary,
+
+ L35   - const Monster* binarySearch(const std::vector<Monster>& bestiary,
+        + const Monster* binarySearch(const Bag<Monster>& bestiary,
+
+ L39   - const Monster* binarySearchRecursive(const std::vector<Monster>& bestiary,
+        + const Monster* binarySearchRecursive(const Bag<Monster>& bestiary,
+
+ L43   - const Monster* findMonster(const std::vector<Monster>& bestiary,
+        + const Monster* findMonster(const Bag<Monster>& bestiary,
+
+ L71   - const T* findByName(const std::vector<T>& items, const std::string& name) {
+        + const T* findByName(const Bag<T>& items, const std::string& name) {
+
+ The second parameter of the four Monster functions is indented to line up
+ with the old, longer type (const std::string&         name). Re-aligning it
+ to  const std::string& name  is cosmetic -- do it or don't.
+
+ findByName's BODY is Monday's work, not part of the switch:
+
+        for (const auto& it : items) {
+            if (it.name == name) return &it;
+        }
+        return nullptr;
+
+ Note the body never mentions vector OR Bag. Flipping the parameter type
+ required zero body changes -- point at that on Wednesday.
+
+
+3.6  bestiary/Search.cpp                                               5 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ The same edit five times:
+
+        - const std::vector<Monster>& bestiary
+        + const Bag<Monster>& bestiary
+
+ L20   linearSearch
+ L45   binarySearch
+ L71   binSearchRec            (the file-local recursive helper)
+ L88   binarySearchRecursive
+ L101  findMonster
+
+ Every body -- the range-for, the low/high/mid arithmetic, the recursion --
+ is UNCHANGED.
+
+
+3.7  bestiary/Bestiary.h                                               3 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ L8    - #include <vector>
+        + #include "../hero/Bag.h"
+
+ L17   - std::vector<Monster> loadBestiary(const std::string& path);
+        + Bag<Monster> loadBestiary(const std::string& path);
+
+ L20   - void sortBestiary(std::vector<Monster>& bestiary);
+        + void sortBestiary(Bag<Monster>& bestiary);
+
+
+3.8  bestiary/Bestiary.cpp                                             3 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ L11   - std::vector<Monster> loadBestiary(const std::string& path) {
+        + Bag<Monster> loadBestiary(const std::string& path) {
+
+ L12   -     std::vector<Monster> result;
+        +     Bag<Monster> result;
+
+ L40   - void sortBestiary(std::vector<Monster>& bestiary) {
+        + void sortBestiary(Bag<Monster>& bestiary) {
+
+ The std::sort call inside sortBestiary is UNCHANGED.
+
+
+3.9  hero/Bench.cpp                                                   13 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ L29   - #include <vector>
+        + #include "Bag.h"
+
+ L40   - std::vector<Item> makeSynthetic(std::size_t n) {
+        + Bag<Item> makeSynthetic(std::size_t n) {
+
+ L45-46 -     std::vector<Item> v;
+         -     v.reserve(n);
+         +     Bag<Item> v;
+
+        DELETE the reserve line. Bag<T> has no reserve() (section 4).
+
+ L70   - void badQuicksortImpl(std::vector<Item>& v,
+        + void badQuicksortImpl(Bag<Item>& v,
+
+ L109  - void badQuicksort(std::vector<Item>& v, const Comparator& cmp) {
+        + void badQuicksort(Bag<Item>& v, const Comparator& cmp) {
+
+ L130  - double avgMillis(const std::vector<Item>& base,
+        + double avgMillis(const Bag<Item>& base,
+
+ L131  -                  const std::function<void(std::vector<Item>&)>& sortFn,
+        +                  const std::function<void(Bag<Item>&)>& sortFn,
+
+ L135  -         std::vector<Item> v = base;
+        +         Bag<Item> v = base;
+
+        The copy works with no extra code: Bag's compiler-generated copy
+        constructor copies its vector member.
+
+ L140  -         g_benchSink = v.data();
+        +         if (!v.empty()) g_benchSink = &v[0];
+
+        Bag<T> has no data() (section 4). This line exists only to stop the
+        optimizer deleting the sort it just timed; taking the address of
+        element 0 does the same job. The empty() guard matters: v[0] on an
+        empty bag is undefined behavior, and operator[] does not check.
+
+ L163  - std::vector<Item> base = makeSynthetic(n);
+        + Bag<Item> base = makeSynthetic(n);
+
+ L169  - [&](std::vector<Item>& v) { mergeSort(v, kCmpWeight); },
+        + [&](Bag<Item>& v) { mergeSort(v, kCmpWeight); },
+
+ L172  - [&](std::vector<Item>& v) {
+        + [&](Bag<Item>& v) {
+
+ L178  - [&](std::vector<Item>& v) {
+        + [&](Bag<Item>& v) {
+
+
+3.10 bestiary/Bench.cpp                                                4 edits
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ L12   - #include <vector>
+        + #include "../hero/Bag.h"
+
+ L21   - std::vector<Monster> makeSynthetic(std::size_t n) {
+        + Bag<Monster> makeSynthetic(std::size_t n) {
+
+ L22-23 -     std::vector<Monster> v;
+         -     v.reserve(n);
+         +     Bag<Monster> v;
+
+        DELETE the reserve line.
+
+ L65   -     const std::string last_name   = bestiary.back().name;
+        +     const std::string last_name   = bestiary[bestiary.size() - 1].name;
+
+        Bag<T> has no back().

@@ -20,7 +20,8 @@
 
 #include <cstddef>
 #include <string>
-#include <vector>
+// #include <vector>
+#include "../hero/Bag.h"
 #include "Monster.h"
 
 namespace dungeon {
@@ -28,19 +29,19 @@ namespace dungeon {
 // ---- Floor 1 reference: Monster-specific searches ---------------------
 //
 // Linear scan. Works on any order.    O(n).
-const Monster* linearSearch(const std::vector<Monster>& bestiary,
+const Monster* linearSearch(const Bag<Monster>& bestiary,
                             const std::string&         name);
 
 // Iterative binary search.            O(log n). Pre: sorted.
-const Monster* binarySearch(const std::vector<Monster>& bestiary,
+const Monster* binarySearch(const Bag<Monster>& bestiary,
                             const std::string&         name);
 
 // Recursive binary search.            O(log n). Pre: sorted.
-const Monster* binarySearchRecursive(const std::vector<Monster>& bestiary,
+const Monster* binarySearchRecursive(const Bag<Monster>& bestiary,
                                      const std::string&         name);
 
 // The seam Floor 1 introduced: one place the rest of the game calls.
-const Monster* findMonster(const std::vector<Monster>& bestiary,
+const Monster* findMonster(const Bag<Monster>& bestiary,
                            const std::string&         name);
 
 
@@ -68,24 +69,11 @@ const Monster* findMonster(const std::vector<Monster>& bestiary,
 // point of Wednesday's class-template lesson.
 
 template <typename T>
-const T* findByName(const std::vector<T>& items, const std::string& name) {
-    // TODO Floor 3 (Mon):
-    //   Walk the container. Return the address of the first element
-    //   whose .name equals `name`. Return nullptr if none match.
-    //
-    //   Your body is about three lines. Resist the urge to write more.
-    //   The whole lesson is that this ONE body works for Monster AND
-    //   Item (and anything else with a .name) without you writing it
-    //   twice.
-    //
-    //   Try this in your head before you type:
-    //     - What does `for (const auto& it : items)` give you, since
-    //       `items` is a std::vector<T>?
-    //     - What expression takes the address of the current element?
-    //     - Floor 1's linearSearch is literally this function with T
-    //       hardcoded to Monster. Copy its SHAPE; drop the hardcode.
-    (void)items;
-    (void)name;
+const T* findByName(const Bag<T>& items, const std::string& name) {
+    for (const auto& item : items){
+        if (item.name == name) return &item;
+    }
+
     return nullptr;
 }
 

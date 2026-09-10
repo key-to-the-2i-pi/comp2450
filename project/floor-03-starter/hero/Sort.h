@@ -8,7 +8,8 @@
 #pragma once
 #include <functional>
 #include <string>
-#include <vector>
+// #include <vector>
+#include "Bag.h"
 #include "Hero.h"
 #include "Item.h"
 
@@ -30,7 +31,7 @@ using Comparator = std::function<bool(const Item&, const Item&)>;
 //   Side effect: sorts `inventory` in place.
 //   Pre:         none.
 //   Big-O:       O(n log n) best / average / worst.
-void mergeSort(std::vector<Item>& inventory, const Comparator& cmp);
+void mergeSort(Bag<Item>& inventory, const Comparator& cmp);
 
 // Quicksort: in-place, O(n log n) average, but O(n^2) worst case.
 //   Side effect: sorts `inventory` in place.
@@ -39,7 +40,7 @@ void mergeSort(std::vector<Item>& inventory, const Comparator& cmp);
 //   Use the MIDDLE element as the pivot. (A first- or last-element
 //   pivot hits O(n^2) on already-sorted data — you will meet the
 //   Pivot Wraith.)
-void quicksort(std::vector<Item>& inventory, const Comparator& cmp);
+void quicksort(Bag<Item>& inventory, const Comparator& cmp);
 
 
 // The function the rest of the game calls when it needs to sort the
