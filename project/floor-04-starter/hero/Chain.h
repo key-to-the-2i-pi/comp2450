@@ -96,6 +96,7 @@ public:
     // (clear() does the same job — implement it below and call it from
     // the destructor body if you prefer one source of truth.)
     ~Chain() {
+        clear();
         // TODO Floor 4 (Wednesday)
     }
 
@@ -119,8 +120,8 @@ public:
     //
     // TODO Floor 4 (Friday) — change `= default` to `= delete` on both.
     // -----------------------------------------------------------------
-    Chain(const Chain&)            = default;   // TODO Friday: = delete
-    Chain& operator=(const Chain&) = default;   // TODO Friday: = delete
+    Chain(const Chain&)            = delete;   // TODO Friday: = delete
+    Chain& operator=(const Chain&) = delete;   // TODO Friday: = delete
 
     // -----------------------------------------------------------------
     // Inspection

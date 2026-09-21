@@ -289,11 +289,52 @@ BattleOutcome runWardenBattle(Hero& hero) {
                     << ". Warden HP -> "
                     << std::max(wardenHP,0)
                     << ".\n";
+
+                    // is warden dead?
+
+                    if (wardenHP > 0){
+                        playerHP -= kWardenAttackDmg;
+
+                        std::cout << "The warden retaliates for "
+                            << kWardenAttackDmg
+                            << ". Your HP -> "
+                            << std::max(playerHP, 0)
+                            << ".\n";
+                    }
+
                     break;
                 }
 
                 case MenuAction::UseItem: {
-                    UseItem();
+                    // let's use an item
+                    UseItem(hero, playerHP);
+                    
+                    // useing an item does consume our turn
+                    // the warden will attack, assuming we are both alive.
+                    if (wardenHP > 0 && playerHP > 0){
+                        playerHP -= kWardenAttackDmg;
+
+                        std::cout << "The warden stikes while you fumble. Your HP -> "
+                            << std::max(playerHP, 0)
+                            << ".\n";
+                    }
+                    break;
+                }
+
+                case MenuAction::Inspect: {
+                    std::cout << "Warden of the Foundations. HP -> "
+                        << wardenHP
+                        << " / "
+                        << kWardenStartHP
+                        << ". No visible weakness (free action).\n";
+                    
+                    break;
+                }
+
+                case MenuAction::Flee: {
+                    // Return to immediately exit the function
+                    return BattleOutcome::Fled;
+                    break;
                 }
             }
         }
@@ -305,7 +346,9 @@ BattleOutcome runWardenBattle(Hero& hero) {
 
     }
 
-    return wardenHP ? BattleOutcome::Victory
+    // condition ? valud_if_true : value_if_false
+    return wardenHP <= 0 
+                    ? BattleOutcome::Victory
                     : BattleOutcome::Defeat;
 }
 
