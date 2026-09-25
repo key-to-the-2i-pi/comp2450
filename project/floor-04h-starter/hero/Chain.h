@@ -153,8 +153,17 @@ public:
     //       More code, but no surprise about why it works.
     //
     // Pick one. Defend it in your lab notes.
-    Chain& operator=(const Chain& /*other*/) {
+    Chain& operator=(const Chain& other) {
         // TODO Friday — copy assignment.
+        // Chain tmp(other); // deep copy the other
+        // swap(tmp); // trade the old with the new tmp
+        // return *this;
+
+        if (this == &other) return *this;
+        clear();
+        for (const Node* p = other.head_; p; p = p->next){
+            push_back(p->data);
+        }
         return *this;
     }
 
@@ -234,6 +243,16 @@ public:
     //   5. --size_.
     void pop_front() {
         // TODO Friday
+        if (head_ == nullptr) return; // empty situation
+
+        Node* old_head = head_;
+        Node* new_head = old_head->next;
+        delete old_head;
+        head_ = new_head;
+        
+        if (new_head != nullptr) new_head->prev = nullptr; // new head has nothing before it
+        else tail_ = nullptr; // case where the chain is now empty
+        --size_; // decrement size
     }
 
     // TODO Floor 4½ (Friday) — remove the back node. O(1) BECAUSE of prev.
@@ -250,6 +269,17 @@ public:
     // *even if it has a tail_ pointer*?
     void pop_back() {
         // TODO Friday
+        if (tail_ == nullptr) return;
+
+        Node* old_tail = tail_;
+        Node* new_tail = old_tail->prev;
+        delete old_tail;
+        tail_ = new_tail;
+
+        if (new_tail != nullptr) new_tail->next = nullptr;
+        else head_ = nullptr;
+
+        --size_;
     }
 
     // Walk and delete every node. Floor 4 version — unchanged loop body,
