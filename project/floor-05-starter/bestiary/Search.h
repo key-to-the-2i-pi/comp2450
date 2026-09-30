@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "../hero/Bag.h"
 #include "Monster.h"
@@ -63,10 +64,18 @@ const Monster* findMonster(const std::vector<Monster>& bestiary,
 
 template <typename T>
 const T* findByName(const Bag<T>& items, const std::string& name) {
-    for (const auto& it : items) {
-        if (it.name == name) return &it;
-    }
-    return nullptr;
+    // return a pointer to the first match or nullptr
+    // &*it --> dereference the iterator to a reference, then take its address.
+    // Standard for turning our iterator back into a raw pointer
+    auto it = std::find_if(items.begin(), items.end(),
+        [&name](const T& x) {return x.name == name;});
+    return (it != items.end()) ? &*it : nullptr;
+
+    // main.cpp:
+    // 3 branches
+    // findByName<Monster>(bestiary, rest) <-- Bag
+    // findByName<Item>(hero.inventory, rest) <-- Bag
+    // std::find_if(hero.eventLog.begin(),...) <-- our chain
 }
 
 }  // namespace dungeon
