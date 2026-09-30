@@ -94,8 +94,12 @@ public:
         // TODO Floor 5 (Monday) — advance to the next node.
         //   pre-increment:    p_ = p_->next;  return *this;
         //   post-increment:   iterator tmp = *this;  ++(*this);  return tmp;
-        iterator& operator++()    { /* TODO Monday */                       return *this; }
-        iterator  operator++(int) { /* TODO Monday */ iterator t = *this;   return t;     }
+        iterator& operator++()    {p_ = p_->next; return *this;} 
+        // ++iterator; pre-increment
+        // Useful for looping
+        iterator  operator++(int) {iterator t = *this; ++(*this); return t;} 
+        // iterator++; post-increment
+        // copy iterator, increment new iterator, return old iterator
 
         // TODO Floor 5 (Friday) — retreat to the previous node.  Needed
         // by std::reverse and by std::reverse_iterator (rbegin/rend).
@@ -117,7 +121,11 @@ public:
         // and loops skip, which keeps the program runnable while
         // operator++ is still empty.
         //   return p_ == other.p_;
-        bool operator==(const iterator& /*other*/) const { return true; /* TODO Monday */ }
+
+        // Equivalence:
+        // iterator1 == iterator2 --> same place?
+        // *iterator1 == *iterator2 --> same value?
+        bool operator==(const iterator& other) const { return p_ == other.p_; }
         bool operator!=(const iterator& other)     const { return !(*this == other); }
 
         // Const-correctness handles for the const_iterator's converting ctor.
@@ -223,8 +231,8 @@ public:
     // the tail. Loops run while `it != end`, advancing via ++.  We pass
     // `this` so the iterator can find the tail in operator-- when
     // walking backward from end (see iterator::operator--).
-    iterator begin() { return iterator(); /* TODO Monday — return iterator(head_, this) */ }
-    iterator end()   { return iterator(); /* TODO Monday — return iterator(nullptr, this) */ }
+    iterator begin() { return iterator(head_, this); }
+    iterator end() { return iterator(nullptr, this); }
 
     // TODO Floor 5 (Wednesday) — same shape, but const_iterator.
     // The cbegin / cend overloads give callers a way to ASK for a
