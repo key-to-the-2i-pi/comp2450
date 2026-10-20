@@ -11,7 +11,7 @@ Example entries:
 
 ## Trial I — The Keepers' Brief
 
-(your declaration)
+Did not use
 
 ## Trial II — The Critique
 
