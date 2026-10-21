@@ -11,7 +11,10 @@ Example entries:
 
 ## Trial I — The Keepers' Brief
 
-Did not use
+Question 1: Did not use
+Question 2: Used Claude for showing how to access an iterator but wrote my own code for the contents of the for loop.
+Question 3: Did not use
+Question 4: Did not use
 
 ## Trial II — The Critique
 
