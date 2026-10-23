@@ -186,8 +186,11 @@ public:
     // TODO Floor 8 (Friday): write findFrom(root_, value) below.
     std::vector<T> lineage(const T& value) const {
         std::vector<T> path;
-        const Node* n = findFrom(root_, value);
+        const Node* n = findFrom(root_, value); // Walk down: find the node!
         if (n == nullptr) return path;          // not found → empty path
+
+        // Walk up: follow the parent pointers (set by addChild()) until we
+        // pass the root (parent == nullptr)
         for (const Node* p = n; p != nullptr; p = p->parent) path.push_back(p->data);
         std::reverse(path.begin(), path.end());  // collected leaf→root; flip it
         return path;
@@ -283,8 +286,12 @@ private:
     //         if (const Node* hit = findFrom(n->children[i], value)) return hit;
     //     return nullptr;
     static const Node* findFrom(const Node* n, const T& value) {
-        (void)n; (void)value;
-        return nullptr;   // TODO Friday
+        if (n == nullptr) return nullptr; // base case: empty subtree
+        if (n->data == value) return n; // act on the node: is it this one?
+        for (std::size_t i = 0; i < n->children.size(); i++){
+            if (const Node* hit = findFrom(n->children[i], value)) return hit;
+        }
+        return nullptr; // checked myself + every subtree and couldn't find it.
     }
 };
 
