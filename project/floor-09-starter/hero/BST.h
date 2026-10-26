@@ -131,8 +131,10 @@ private:
     //     else if (n->data < value) n->right = insertInto(n->right, value);
     //     return n;
     static Node* insertInto(Node* n, const T& value) {
-        (void)value;
-        return n;   // TODO Monday — stub leaves the tree unchanged
+        if (n == nullptr) return new Node(value);
+        if (value < n->data) n->left = insertInto(n->left, value);
+        else if (n->data < value) n->right = inserInto(n->right, value);
+        return n;
     }
 
     // Search for `value`. Unlike Floor 8's findFrom, you do NOT ask every
@@ -145,8 +147,10 @@ private:
     //     if (n->data < value) return findFrom(n->right, value);
     //     return n;   // equal => found
     static const Node* findFrom(const Node* n, const T& value) {
-        (void)n; (void)value;
-        return nullptr;   // TODO Monday
+        if (n == nullptr) return nullptr;
+        if (value < n->data) return findFrom(n->left, value);
+        if (n->data < value) return findFrom(n->right, value);
+        return n;
     }
 
     // ----- Wednesday -------------------------------------------------
