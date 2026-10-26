@@ -24,6 +24,7 @@ Creatures of the Hold/Vermin/Bone Spider
 Creatures of the Hold/Vermin/Ratking
 Creatures of the Hold/Vermin/Marsh Lurker
 Creatures of the Hold/Constructs/Stone Sentinel
+Creatures of the Hold/Vermin/Marsh Lurker/Goblin
 
 # Note: the Goblin is deliberately absent. McCown never finished cataloguing
 # Grix's kin — they slept through the Plague and were missed. `lineage Goblin`
