@@ -232,20 +232,25 @@ private:
     //     n->right = removeFrom(n->right, succ->data, discard);
     //     return n;
     static Node* removeFrom(Node* n, const T& value, bool& removed) {
-        if (n == nullptr) return nullptr;
+        // movement 1: find the value, same walk as the findFrom function
+        if (n == nullptr) return nullptr; // base case: ran off the bottom of the tree
         
         if (value < n->data) { n->left = removeFrom(n->left, value, removed); return n; }
         if (n->data < value) { n->right = removeFrom(n->right, value, removed); return n;}
         removed = true;
 
-        if (n->left == nullptr) {Node* r = n->right; delete n; return r; }
+        // Movement 2: zero or one child. Whatever is below moves up into the spot.
+        // save the child in r or l before delete n
+        // after deleting, n->right could not be read
+        if (n->left == nullptr) {Node* r = n->right; delete n; return r; } // "These are the droids you are looking for!"
         if (n->right == nullptr) {Node* l = n->left; delete n; return l; }
 
-        Node* succ= n->right;
-        while (succ->left != nullptr) succ = succ->left;
-        n->data = succ->data;
-        bool discard = false;
-        n->right = removeFrom(n->right, succ->data, discard);
+        // Movement 3: two childrenn case? find the smallest value on the right side
+        Node* succ = n->right;
+        while (succ->left != nullptr) {succ = succ->left;}
+        n->data = succ->data; // copy that new data into a node 
+        bool discard = false; // removed is already true, so ignore what the next call reports back
+        n->right = removeFrom(n->right, succ->data, discard); // remove the old copy from the right side for it has no left child
         return n;
     }
 };
