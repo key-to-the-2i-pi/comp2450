@@ -207,8 +207,8 @@ private:
     //     if (n == nullptr) return 0;
     //     return signedHeight(n->left) - signedHeight(n->right);
     static int balanceFactorOf(const Node* n) {
-        (void)n;
-        return 0;   // TODO Monday — stub reports every tree as perfectly level
+        if (n == nullptr) return 0;
+        return signedHeight(n->left) - signedHeight(n->right);
     }
 
     // True iff the subtree at n is height-balanced at EVERY node. Check THIS
@@ -221,8 +221,12 @@ private:
     //     if (bf < -1 || bf > 1) return false;
     //     return isBalancedFrom(n->left) && isBalancedFrom(n->right);
     static bool isBalancedFrom(const Node* n) {
-        (void)n;
-        return true;   // TODO Monday — stub claims every tree is balanced
+        // case of an empty tree
+        if (n == nullptr) return true;
+        // how much does this node
+        const int bf = balanceFactorOf(n);
+        if (std::abs(bf) > 1) return false;
+        return isBalancedFrom(n->left) && isBalancedFrom(n->right);
     }
 
     // ----- Wednesday: the rotation primitive -------------------------
@@ -236,7 +240,7 @@ private:
     /*
                n                 pivot
               / \                /   \
-          pivot  c    =>        a     n
+          pivot  c     =>       a     n
            / \                        / \
           a   b                      b   c
     */
@@ -246,7 +250,11 @@ private:
     //     pivot->right = n;
     //     return pivot;
     static Node* rotateRight(Node* n) {
-        return n;   // TODO Wednesday — stub returns the tree unrotated
+        // left child is coming up
+        Node* pivot = n->left;
+        n->left = pivot->right;
+        pivot->right = n;
+        return pivot;
     }
 
     // Left rotation around n — the mirror of rotateRight. n's RIGHT child
@@ -259,7 +267,11 @@ private:
     //     pivot->left = n;
     //     return pivot;
     static Node* rotateLeft(Node* n) {
-        return n;   // TODO Wednesday — stub returns the tree unrotated
+        // right child is the one coming up
+        Node* pivot = n->right;
+        n->right = n->left;
+        pivot->left = n;
+        return pivot;
     }
 
     // ----- Friday: pick the rotation ---------------------------------
