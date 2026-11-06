@@ -289,7 +289,14 @@ private:
     //     if (bf < -1) return rotateLeft(n);    // right-heavy
     //     return n;
     static Node* rebalanceAt(Node* n) {
-        return n;   // TODO Friday — stub never rebalances
+        if (n == nullptr) return n;
+        const int bf = balanceFactorOf(n);
+        // leaning left by 2 or more
+        if (bf > 1) return rotateRight(n);
+        // leaning right by 2 or more
+        if (bf < -1) return rotateLeft(n);
+        // if both are false, then we leave it alone and return
+        return n;
     }
 };
 
