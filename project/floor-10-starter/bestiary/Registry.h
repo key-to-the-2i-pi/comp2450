@@ -111,8 +111,10 @@ public:
     // TODO Floor 10 (Monday). Stub is empty -> phases 1–6 all FAIL (everything
     // is empty). Monday's first edit lights phase 1.
     void index(const Monster& m) {
-        (void)m;
-        // TODO Monday — populate byName_, weaknesses_, and weaknessCounts_.
+        byName_[m.name] = m; // file the whole record under its name
+        weaknesses_.insert(m.weakness); // add the weakness to the set
+        weaknessCounts_[m.weakness] += 1; // bump up tally
+        // when we do this, a new key begins at 0.
     }
 
     // Return whether a monster with that name is in the registry — using the
@@ -121,8 +123,8 @@ public:
     // TODO Floor 10 (Monday). Sketch:
     //     return byName_.count(name) > 0;     // (or: find(name) != end())
     bool knows(const std::string& name) const {
-        (void)name;
-        return false;   // TODO Monday — stub never knows anyone
+        // count is either 0 or 1 on a map because on a map, the keys are unique 
+        return byName_.count(name) > 0; // we could also do: find(name) != end()
     }
 
     // ----- Wednesday: three containers, three one-liners -------------
@@ -135,8 +137,9 @@ public:
     //     auto it = byName_.find(name);
     //     return it == byName_.end() ? nullptr : &it->second;
     const Monster* recall(const std::string& name) const {
-        (void)name;
-        return nullptr;   // TODO Wednesday — stub finds no one
+        auto it = byName_.find(name);
+        // end() == not here; else brab the pair's .second (which is the monster) 
+        return it == byName_.end() ? nullptr : &it->second;
     }
 
     // Return whether ANY monster has weakness w — using set::count on
@@ -146,8 +149,9 @@ public:
     // TODO Floor 10 (Wednesday). Sketch:
     //     return weaknesses_.count(w) > 0;
     bool hasWeakness(const std::string& w) const {
-        (void)w;
-        return false;   // TODO Wednesday — stub claims nothing is weak to anything
+        // Same shape as knows()
+        // the only difference is that this is a set: either a 0 or a 1
+        return weaknesses_.count(w) > 0;
     }
 
     // Return how many monsters share weakness w, or 0 if none — by reading
@@ -158,8 +162,12 @@ public:
     //     auto it = weaknessCounts_.find(w);
     //     return it == weaknessCounts_.end() ? 0 : it->second;
     int countWeakness(const std::string& w) const {
-        (void)w;
-        return 0;   // TODO Wednesday — stub counts nothing
+        // we do not want to use [] --> this adds a new entry with zero stored in it
+        // find is only going to LOOK (no key will every)
+        auto it = weaknessCounts_.find(w);
+        // missing - 0, and the map is left untouched
+        // if we had done weaknessCounts_[w], this would have not compiled here
+        return it == weaknessCounts_.end() ? 0 : it->second;
     }
 
     // ----- Friday: mutate, staying consistent ------------------------
@@ -185,8 +193,23 @@ public:
     //     }
     //     return true;
     bool forget(const std::string& name) {
-        (void)name;
-        return false;   // TODO Friday — stub forgets nothing
+        // find the plate first
+        auto it = byName_.find(name);
+        // if there is no name, nothing to remove
+        if (it == byName_.end()) return false;
+        // copy its weakness NOW; after we erase, the record would be gone
+        const std::string w = it->second.weakness;
+        // remove the plate, using the iterator
+        byName_.erase(it);
+        // one fewer with this weakness
+        // ([] is safe here, then w exists)
+        if (--weaknessCounts_[w] == 0) {
+            // count hits zero: drop the tally row
+            weaknessCounts_.erase(w);
+            // take it off the weakness shelf
+            weaknesses_.erase(w);
+        }
+        return true; // something was removed
     }
 
 private:
