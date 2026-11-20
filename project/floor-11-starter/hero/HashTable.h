@@ -130,18 +130,11 @@ public:
     // mutating buckets_ while iterating it (mutating a container you are walking
     // is the aliasing bug §8 warns about).
     void rehash(std::size_t newBucketCount) {
-        if (newBucketCount < 1) newBucketCount = 1;
-        std::vector<Chain<Monster>> grown(newBucketCount);
-        for (const Chain<Monster>& bucket : buckets_) {
+        if (newBucketCount < 1) newBucketCount = 1; // never zero buckets
+        std::vector<Chain<Monster>> grown(newBucketCount); // fresh, empty. bigger count
+        for (const Chain<Monster>& bucket : buckets_) { // every monster in its chain
             for (const Monster& m : bucket) {
-                // ===== YOU WRITE (Friday, with rehashIfNeeded #6) =====
-                // Compute m's home in the NEW, bigger array and push it there.
-                // It is one line. Sketch:
-                //     grown[hashKey(m.name) % newBucketCount].push_back(m);
-                // (count_ does NOT change here — rehash moves items, it does not
-                //  add or drop any. The TODO stub below files nothing, so after a
-                //  rehash the table would be EMPTY and self-test phase 6 FAILs.)
-                (void)m;   // TODO Friday — re-file m into grown[...]
+                grown[hashKey(m.name) % newBucketCount].push_back(m);
             }
         }
         buckets_.swap(grown);
@@ -264,9 +257,11 @@ public:
     bool erase(const std::string& name) {
         std::size_t i = bucketIndex(name);
         bool removed = buckets_[i].eraseFirst(
+            // is this the one?
             [&](const Monster& m) {return m.name == name;});
-        
-        if (removed) -- count_;
+            // count only goes down if something leaves
+        if (removed) --count_;
+        // true = gone, false = not there.
         return removed;
     }
 
@@ -284,6 +279,7 @@ public:
     //         rehash(buckets_.size() * 2);
     //     return buckets_.size();
     std::size_t rehashIfNeeded() {
+        // if items / buckets is over 0.75, we need some elbow room
         if (loadFactor() > kMaxLoadFactor)
             rehash(buckets_.size() * 2);
         return buckets_.size();
